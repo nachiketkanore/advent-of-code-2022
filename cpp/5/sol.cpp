@@ -23,11 +23,11 @@ int32_t main() {
 
 	int N;
 	cin >> N;
-	vector<string> A(N + 1);
+	vector<string> A(N + 1), B(N + 1);
 	FOR(i, 1, N) {
 		cin >> A[i];
+		B[i] = A[i];
 	}
-	// see(A);
 	string ch;
 	int cnt, from, to;
 	while (cin >> ch >> cnt >> ch >> from >> ch >> to) {
@@ -35,19 +35,28 @@ int32_t main() {
 		while (cnt--) {
 			char get = A[from].back();
 			A[from].pop_back();
-			// A[to].push_back(get);
+			A[to].push_back(get);
+
+			get = B[from].back();
+			B[from].pop_back();
 			put.push_back(get);
 		}
 		reverse(ALL(put));
 		for (char c : put) {
-			A[to].push_back(c);
+			B[to].push_back(c);
 		}
-		// see(A);
 	}
+	string ans1;
 	FOR(i, 1, N) {
-		cout << A[i].back();
+		ans1 += A[i].back();
 	}
-	cout << '\n';
+
+	string ans2;
+	FOR(i, 1, N) {
+		ans2 += B[i].back();
+	}
+	cout << ans1 << '\n';
+	cout << ans2 << '\n';
 
 	return 0;
 }
