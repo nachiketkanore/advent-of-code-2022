@@ -32,7 +32,6 @@ struct node {
 };
 
 int tot = 0;
-vector<int> sizes;
 
 int dfs(node* curr) {
 	int ans = curr->val;
@@ -42,9 +41,6 @@ int dfs(node* curr) {
 	// see(curr->name, ans);
 	if (curr->is_dir && ans <= 100000) {
 		tot += ans;
-	}
-	if (curr->is_dir) {
-		sizes.push_back(ans);
 	}
 	return ans;
 }
@@ -106,19 +102,8 @@ int32_t main() {
 		}
 	}
 
-	int all = dfs(start);
-
-	int unused = 70000000 - all;
-	int req = 30000000 - unused;
-	see(req);
-	int ans = 1e12;
-
-	for (int ss : sizes) {
-		see(ss);
-		if (ss >= req) {
-			ans = min(ans, ss);
-		}
-	}
-	cout << ans << '\n';
+	dfs(start);
+	cout << tot << '\n';
+	// answer = 1428881
 	return 0;
 }
