@@ -1,4 +1,4 @@
-#![allow(unused)]
+// #![allow(unused)]
 fn main() {}
 
 fn solve_part1(input: &str) -> Vec<usize> {
@@ -8,25 +8,23 @@ fn solve_part1(input: &str) -> Vec<usize> {
         .lines()
         .map(|line| line.chars().collect::<Vec<char>>())
     {
-        let n = line.len();
-        let mut found = false;
-        for i in LEN - 1..n {
-            let mut good = true;
-            let mut mask = 0;
-            for j in 0..LEN {
-                let id = (line[i - j] as u8 - 'a' as u8);
-                good &= (mask >> id & 1) == 0;
-                mask |= 1 << id;
-            }
-            if good {
-                found = true;
-                answers.push(i + 1);
-                break;
-            }
-        }
-        assert!(found);
+        let n: usize = line.len();
+        answers.push(
+            (LEN - 1..n)
+                .filter(|i| {
+                    (0..LEN)
+                        .fold(0usize, |mask, j| {
+                            mask | (1 << (line[i - j] as u8 - 'a' as u8))
+                        })
+                        .count_ones() as usize
+                        == LEN
+                })
+                .next()
+                .unwrap()
+                + 1,
+        );
     }
-    return answers;
+    answers
 }
 
 fn solve_part2(input: &str) -> Vec<usize> {
@@ -36,25 +34,23 @@ fn solve_part2(input: &str) -> Vec<usize> {
         .lines()
         .map(|line| line.chars().collect::<Vec<char>>())
     {
-        let n = line.len();
-        let mut found = false;
-        for i in LEN - 1..n {
-            let mut good = true;
-            let mut mask = 0;
-            for j in 0..LEN {
-                let id = (line[i - j] as u8 - 'a' as u8);
-                good &= (mask >> id & 1) == 0;
-                mask |= 1 << id;
-            }
-            if good {
-                found = true;
-                answers.push(i + 1);
-                break;
-            }
-        }
-        assert!(found);
+        let n: usize = line.len();
+        answers.push(
+            (LEN - 1..n)
+                .filter(|i| {
+                    (0..LEN)
+                        .fold(0usize, |mask, j| {
+                            mask | (1 << (line[i - j] as u8 - 'a' as u8))
+                        })
+                        .count_ones() as usize
+                        == LEN
+                })
+                .next()
+                .unwrap()
+                + 1,
+        );
     }
-    return answers;
+    answers
 }
 
 #[cfg(test)]
