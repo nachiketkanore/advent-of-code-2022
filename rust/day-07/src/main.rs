@@ -50,11 +50,11 @@ fn solve_part1(input: &str) -> u32 {
                         let mut found = false;
                         // dbg!(&head);
                         // assert!(&head.children.len() > &0);
-                        for &child in head.children {
+                        for child in &head.children {
                             // very bad implementation, will improve later?
                             // not sure if this is still going to work or not?
                             // dbg!(&child);
-                            if *child.as_ref().unwrap().name == dir_name {
+                            if *child.unwrap().name == dir_name {
                                 head = child.unwrap();
                                 found = true;
                                 break;
