@@ -74,7 +74,6 @@ fn solve_part1(input: &str) -> u32 {
         .filter(|line| !line.is_empty())
         .map(|line| line.chars().collect::<Vec<char>>())
         .collect();
-    dbg!(&mat);
 
     let grid = Matrix {
         n: mat.len() as i32,
@@ -108,7 +107,6 @@ fn solve_part2(input: &str) -> i32 {
         .filter(|line| !line.is_empty())
         .map(|line| line.chars().collect::<Vec<char>>())
         .collect();
-    dbg!(&mat);
 
     let grid = Matrix {
         n: mat.len() as i32,
