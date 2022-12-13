@@ -34,7 +34,6 @@ bool is_list(int i, int j, const string& S) {
 }
 
 int get_first_value(int i, int j, const string& S) {
-	const int N = S.size();
 	FOR(id, i, j) {
 		if (isdigit(S[id]) && id + 1 <= j && isdigit(S[id + 1])) {
 			return (S[id] - '0') * 10 + (S[id + 1] - '0');
@@ -50,6 +49,7 @@ int get_first_value(int i, int j, const string& S) {
 	// assert(check_empty(i, j, S));
 	return -1;
 }
+bool ls;
 
 vector<pair<int, int>> get_element_indices(int i, int j, const string& S) {
 	vector<pair<int, int>> ret;
@@ -108,6 +108,7 @@ int solve(int si, int sj, int ti, int tj, const string& S, const string& T) {
 			// see("HERE", S.substr(xi, xj - xi + 1), T.substr(yi, yj - yi +
 			// 1)); see("checking", A, B);
 			greater_found |= A > B;
+			ls |= A < B;
 		} else if (is_list(xi, xj, S) && is_list(yi, yj, T)) {
 			// see("HERE", S.substr(xi, xj - xi + 1), T.substr(yi, yj - yi + 1));
 			bool eS = check_empty(xi, xj, S);
@@ -127,18 +128,27 @@ int solve(int si, int sj, int ti, int tj, const string& S, const string& T) {
 			if (is_integer(xi, xj, S)) {
 				int A = stoll(S.substr(xi, xj - xi + 1));
 				int B = get_first_value(yi, yj, T);
-				if (~B)
+				// if (A == 10 || B == 10) {
+				// 	see("found");
+				// }
+				if (~B) {
+					ls |= A < B;
 					greater_found |= A > B;
-				else {
+				} else {
 					greater_found = true;
 				}
 				// see("comparing", A, B);
 			} else if (is_integer(yi, yj, T)) {
 				int A = get_first_value(xi, xj, S);
 				int B = stoll(T.substr(yi, yj - yi + 1));
-				if (~A)
+				if (A == 10 || B == 10) {
+					see("found");
+				}
+				if (~A) {
+					ls |= A < B;
 					greater_found |= A > B;
-				else {
+				} else {
+					ls |= 1;
 					// nothing?
 				}
 				// see("comparing", A, B);
@@ -159,9 +169,10 @@ int32_t main() {
 	string S, T;
 	int ans = 0, idx = 1;
 	while (cin >> S >> T) {
+		::ls = false;
 		bool ok = !solve(0, sz(S) - 1, 0, sz(T) - 1, S, T);
-		if (ok) {
-			// see(S, T);
+		if (::ls) {
+			see(S, T);
 			ans += idx;
 		}
 		idx += 1;
@@ -177,5 +188,12 @@ int32_t main() {
 	// 2, 4 <- good
 	// 3, null
 	// 4, null
+	// [[],5,[0]],[7],[[2,7,[7]],[[8,3],[8,9,8],6,[]],[1,3,[0,4,10],[6,1,9]],8],[[3,0]]
+	// [5,[],10]
+	// [[],5,[0]]
+	// [5]
+	// [], 5
+	// [], [5]
+	//
 	return 0;
 }
