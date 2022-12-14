@@ -1,6 +1,8 @@
 #![allow(unused)]
 use std::collections::HashSet;
-fn main() {}
+fn main() {
+    dbg!("day 09");
+}
 
 // side adjacent
 const DX: &[i32] = &[0, 0, 1, -1];
@@ -36,11 +38,11 @@ fn get_direction(ch: char) -> Direction {
     }
 }
 
-fn perform((mut hi, mut hj): (i32, i32), (mut ti, mut tj): (i32, i32)) -> (i32, i32) {
+fn perform((hi, hj): (i32, i32), (mut ti, mut tj): (i32, i32)) -> (i32, i32) {
     if ti == hi && tj == hj {
         return (ti, tj);
     }
-    let mut ok = (0..4).any(|id| {
+    let ok = (0..4).any(|id| {
         (ti + DX[id] == hi && tj + DY[id] == hj) | (ti + DGX[id] == hi && tj + DGY[id] == hj)
     });
     if ok {
@@ -89,33 +91,30 @@ fn perform((mut hi, mut hj): (i32, i32), (mut ti, mut tj): (i32, i32)) -> (i32, 
 }
 
 fn solve(input: &str, snake_len: usize) -> usize {
-    let input: Vec<(Direction, i32)> = input
+    let mut tail = vec![(0, 0); snake_len];
+    let mut visited = HashSet::new();
+    visited.insert(tail[0]);
+
+    input
         .lines()
         .map(|line| {
             let tokens = line.split(' ').collect::<Vec<&str>>();
             let dir = tokens[0].chars().next().unwrap();
             (get_direction(dir), tokens[1].parse().unwrap())
         })
-        .collect();
-
-    let mut tail = vec![(1000, 1000); snake_len];
-    let mut visited = HashSet::new();
-    visited.insert(tail[0]);
-
-    for (dir, iterations) in input {
-        let (dx, dy) = get_move(dir);
-        for _ in 0..iterations {
-            let len = tail.len();
-            tail[len - 1].0 += dx;
-            tail[len - 1].1 += dy;
-            for i in (0..len - 1).rev() {
-                tail[i] = perform(tail[i + 1], tail[i]);
+        .for_each(|(dir, iterations)| {
+            let (dx, dy) = get_move(dir);
+            for _ in 0..iterations {
+                let len = tail.len();
+                tail[len - 1].0 += dx;
+                tail[len - 1].1 += dy;
+                (0..len - 1).rev().for_each(|i| {
+                    tail[i] = perform(tail[i + 1], tail[i]);
+                });
+                visited.insert(tail[0]);
             }
-            visited.insert(tail[0]);
-        }
-    }
-
-    return visited.len();
+        });
+    visited.len()
 }
 
 fn solve_part1(input: &str) -> usize {
