@@ -36,12 +36,13 @@ vector<string> parse(const string& S) {
 	return ret;
 }
 
-map<string, vector<string>> adj;
+const int INF = 1e7;
+map<string, vector<string>> neigh;
+vector<int> adj[60];
+int w[60], dist[60][60];
 map<string, int> capacity;
+vector<int> special;
 
-// map<pair<pair<int8_t, int8_t>, int64_t>, int> dp[27][27];
-map<int64_t, int> dp[27][27][60][60];
-int best_so_far = 0;
 vector<string> nodes;
 
 int get_id(const string& node) {
@@ -50,50 +51,53 @@ int get_id(const string& node) {
 	return id;
 }
 
-int dfs(const string& one, const string& two, int rem_one, int rem_two, int64_t mask) {
-	if (rem_one == 0 && rem_two == 0) {
+int get_special_id(int node) {
+	F0R(i, sz(special)) if (special[i] == node) return i;
+	assert(false);
+}
+
+int go(int one, int two, int rem, int special_mask) {
+	if (rem < 0)
+		return -INF;
+	if (rem == 0)
 		return 0;
-	}
-	int one_id = get_id(one);
-	int two_id = get_id(two);
-	if (dp[rem_one][rem_two][one_id][two_id].count(mask)) {
-		return dp[rem_one][rem_two][one_id][two_id][mask];
-	}
-	// see("checking", one, two, best_so_far);
+
+	see(one, two, rem);
+
+	// one -> none, some special node unset in special_mask
+	// two -> tone, some special node unset in special_mask
+
+	// time req = dist[one][none]
+	// time req = dist[one][tone]
+
+	int one_id = get_special_id(one);
+	int two_id = get_special_id(two);
+	// int here = (rem - 1) * (w[one] + (one == two ? 0 : w[two]));
 	int ans = 0;
-	int one_cap = capacity[one];
-	bool count_one = mask >> one_id & 1;
-	if (!count_one && rem_one - 1 > 0 && one_cap > 0) {
-		// open.insert(one);
-		int get = (rem_one - 1) * one_cap +
-		dfs(one, two, rem_one - 1, rem_two, mask | (1 << one_id));
-		ans = max(ans, get);
-		// open.erase(one);
-	}
-	int two_cap = capacity[two];
-	bool count_two = mask >> two_id & 1;
-	if (!count_two && rem_two - 1 > 0 && two_cap > 0) {
-		// open.insert(two);
-		int get = (rem_two - 1) * two_cap +
-		dfs(one, two, rem_one, rem_two - 1, mask | (1 << two_id));
-		ans = max(ans, get);
-		// open.erase(two);
-	}
-	if (rem_one - 1 > 0 && rem_two - 1 > 0) {
-		vector<string> twoadj = adj[two];
-		random_shuffle(ALL(twoadj));
-		vector<string> oneadj = adj[one];
-		random_shuffle(ALL(oneadj));
-		for (const string& two_nxt : twoadj) {
-			for (const string& one_nxt : oneadj) {
-				ans = max(ans, dfs(one_nxt, two_nxt, rem_one - 1, rem_two - 1, mask));
+
+	F0R(i, sz(special)) if (special[i] != one) {
+		F0R(j, sz(special)) if (special[j] != two) {
+			int ni = special[i], nj = special[j];
+			int treq = max(dist[one][ni], dist[two][nj]);
+			if (rem - treq < 0 || treq == 0)
+				continue;
+			int get = 0;
+			if ((special_mask >> i & 1) == 0) {
+				int val = (rem - dist[one][ni] - 1) * w[ni];
+				see("taking", w[ni], val);
+				get += val;
 			}
+			if ((special_mask >> j & 1) == 0) {
+				int val = (rem - dist[two][nj] - 1) * w[nj];
+				see("taking", w[nj], val);
+				get += val;
+			}
+			get += go(ni, nj, rem - treq, special_mask | (1 << i) | (1 << j));
+			ans = max(ans, get);
 		}
 	}
 
-	best_so_far = max(best_so_far, ans);
-	see(best_so_far);
-	dp[rem_one][rem_two][one_id][two_id][mask] = ans;
+	see(one, two, ans);
 
 	return ans;
 }
@@ -101,21 +105,51 @@ int dfs(const string& one, const string& two, int rem_one, int rem_two, int64_t 
 int32_t main() {
 	ios::sync_with_stdio(0);
 	cin.tie(0);
-	srand(time(NULL));
 
 	string s;
+	int n = 0;
 	while (getline(cin, s)) {
 		vector<string> tokens = parse(s);
 		int w = stoll(tokens[1]);
 		string u = tokens[0];
 		capacity[u] = w;
 		for (int i = 2; i < sz(tokens); i++) {
-			adj[u].push_back(tokens[i]);
+			neigh[u].push_back(tokens[i]);
 		}
 		nodes.push_back(u);
-		// see(tokens);
 	}
 	sort(ALL(nodes));
+
+	F0R(i, 60) F0R(j, 60) dist[i][j] = (i != j ? INF : 0);
+	for (auto [u, vlist] : neigh) {
+		int uid = get_id(u);
+		n = max(n, uid + 1);
+		w[uid] = capacity[u];
+		if (w[uid] > 0) {
+			special.push_back(uid);
+		}
+		for (auto v : vlist) {
+			int vid = get_id(v);
+			n = max(n, vid + 1);
+			dist[uid][vid] = 1;
+			adj[uid].push_back(vid);
+		}
+	}
+	special.push_back(0);
+	sort(ALL(special));
+	for (int spl : special) {
+		see(spl, w[spl]);
+	}
+	n = 60;
+	F0R(k, n)
+	F0R(u, n) F0R(v, n) dist[u][v] = min(dist[u][v], dist[u][k] + dist[k][v]);
+	see(dist[get_id("AA")][get_id("HH")]);
+	// return 0;
+
+	assert(get_id("AA") == 0);
+	// we always jump from one special node to other
+	int ans = go(0, 0, 26, 1 << 0);
+	cout << ans << '\n';
 
 	/* for (auto [u, vlist] : adj) {
 		vector<int> nei;
@@ -123,8 +157,6 @@ int32_t main() {
 			nei.push_back(get_id(v));
 		}
 	} */
-
-	cout << dfs("AA", "AA", 26, 26, int64_t(0)) << '\n';
 
 	return 0;
 }
