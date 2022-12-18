@@ -21,6 +21,7 @@ using namespace std;
 const int MAX_ROW = 4000;
 vector<vector<pair<int, int>>> blocks;
 set<pair<int, int>> done;
+int up[7];
 
 void init() {
 	{
@@ -92,6 +93,8 @@ int32_t main() {
 	int obj_id = 0;
 	int high = MAX_ROW;
 	int move_id = 0;
+	map<set<pair<int, int>>, int> memo;
+	F0R(col, 7) up[col] = MAX_ROW;
 
 	FOR(round, 1, 2022) {
 		vector<pair<int, int>> curr = blocks[obj_id];
@@ -105,6 +108,19 @@ int32_t main() {
 					++r;
 			} else
 				break;
+		}
+		set<pair<int, int>> upper;
+		F0R(col, 7) {
+			upper.insert(make_pair(up[col], col));
+		}
+		see(round);
+		for (auto it : upper) {
+			see(it);
+		}
+		if (memo.count(upper)) {
+			see("repeated............................................", round);
+		} else {
+			memo[upper] = round;
 		}
 
 		// see(round, curr);
@@ -145,7 +161,7 @@ int32_t main() {
 				break;
 			}
 
-			see(round, curr);
+			// see(round, curr);
 			// FOR(row, MAX_ROW - 30, MAX_ROW - 1) {
 			// 	F0R(col, 7) {
 			// 		if (find(ALL(curr), make_pair(row, col)) != curr.end()) {
@@ -161,6 +177,7 @@ int32_t main() {
 		for (auto [r, c] : curr) {
 			assert(!done.count({ r, c }));
 			done.insert({ r, c });
+			up[c] = min(up[c], r);
 			high = min(high, r);
 		}
 		// for (auto cell : done) {
